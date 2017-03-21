@@ -7,7 +7,8 @@
 
 •	Скачать файл https://github.com/Animatory/Competition/blob/master/Tbot.pyz
 
-•	Скачать файл https://github.com/Animatory/Competition/blob/master/config.
+•	Скачать файл https://github.com/Animatory/Competition/blob/master/config.ini
+Установить модули pyTelegramBotAPI, configparser
 
 •	Зарегистрировать в телеграмме бота, получив его токен
 
