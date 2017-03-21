@@ -10,6 +10,7 @@ from Users.shedule import start
 from Users.Game import start_game
 import _thread
 import configparser
+import re
 
 configs = configparser.ConfigParser()
 configs.read("config.ini")
@@ -33,7 +34,7 @@ def find_file_ids(message):
 
 @bot.message_handler(commands=['admin'])
 def be_admin(message):
-    pw = message.text.split(" ", 1)[1]
+    pw = re.sub('\/\w+\s', "", message.text)
     if pw == configs["DEFAULT"]["password"] and not get_users().admins_list:
         bot.send_message(message.chat.id,
                          "Здравствуйте, {} {}".format(message.from_user.first_name, message.from_user.last_name))
