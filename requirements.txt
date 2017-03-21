@@ -1,0 +1,2 @@
+pytelegrambotapi>=2.3.1
+configparser>=3.5.0
