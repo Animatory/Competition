@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 import time
-from random import shuffle
 import sqlite3
-import telebot
-import os
 import re
-import config
 
 at = ('/добавить_участника <Фамилия> <Имя> <Отчество>, <Группа>, <Место жительства> - добавляет пользователя в '
       'базу бота и предоставляет ему доступ пользовательскому функционалу бота и даёт возможность администраторам '

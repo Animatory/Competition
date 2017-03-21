@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import telebot
-import config
 import os
 import time
 import random
@@ -12,7 +11,10 @@ from Users.Game import start_game
 import _thread
 import configparser
 
-bot = telebot.TeleBot(config.token)
+configs = configparser.ConfigParser()
+configs.read("config.ini")
+
+bot = telebot.TeleBot(configs["DEFAULT"]["Token"])
 
 
 @bot.message_handler(func=lambda message: message.chat.type == "group", commands=['quest'])
@@ -32,7 +34,7 @@ def find_file_ids(message):
 @bot.message_handler(commands=['admin'])
 def be_admin(message):
     pw = message.text.split(" ", 1)[1]
-    if pw == config.password and not get_users().admins_list:
+    if pw == configs["DEFAULT"]["password"] and not get_users().admins_list:
         bot.send_message(message.chat.id,
                          "Здравствуйте, {} {}".format(message.from_user.first_name, message.from_user.last_name))
         Admin(bot, message)
@@ -65,6 +67,7 @@ def check_answer(message):
             Admin(bot, message)
         else:
             User(bot, message)
+
 
 def main():
     random.seed()
