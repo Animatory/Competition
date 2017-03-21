@@ -10,6 +10,7 @@ from Users.Users import SuperUser, User, Admin, get_users
 from Users.shedule import start
 from Users.Game import start_game
 import _thread
+import configparser
 
 bot = telebot.TeleBot(config.token)
 
@@ -31,11 +32,10 @@ def find_file_ids(message):
 @bot.message_handler(commands=['admin'])
 def be_admin(message):
     pw = message.text.split(" ", 1)[1]
-    if pw == config.password:
+    if pw == config.password and not get_users().admins_list:
         bot.send_message(message.chat.id,
                          "Здравствуйте, {} {}".format(message.from_user.first_name, message.from_user.last_name))
-        if not get_users().admins_list:
-            Admin(bot, message)
+        Admin(bot, message)
 
 
 @bot.message_handler(commands=['start'])
@@ -66,8 +66,10 @@ def check_answer(message):
         else:
             User(bot, message)
 
-
-if __name__ == '__main__':
+def main():
     random.seed()
     _thread.start_new_thread(start, (bot,))
     bot.polling(none_stop=True)
+
+if __name__ == '__main__':
+    main()
