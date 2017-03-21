@@ -344,26 +344,30 @@ class Admin(SuperUser):
                 self.de()
 
     def hello(self, message):
+
         connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
-        txt = [i.strip() for i in message.text.split(",", maxsplit=2)]
-        txt[:1] = txt[0].split(" ")
-        txt = [self.user_id] + txt
         try:
-            cursor.execute("""CREATE TABLE Admins (
-                                'id'	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-                                'last_name'	TEXT NOT NULL,
-                                'first_name'	TEXT NOT NULL,
-                                'sub_name'	TEXT,
-                                'phone'	TEXT NOT NULL,
-                                'act'	TEXT,
-                                'about_me'	TEXT);""")
-        except sqlite3.OperationalError:
-            pass
-        cursor.execute("insert into Admins values (?, ?, ?, ?, ?, ?, '')", txt)
+            txt = [i.strip() for i in message.text.split(",", maxsplit=2)]
+            txt[:1] = txt[0].split(" ")
+            txt = [self.user_id] + txt
+            try:
+                cursor.execute("""CREATE TABLE Admins (
+                                            'id'	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                                            'last_name'	TEXT NOT NULL,
+                                            'first_name'	TEXT NOT NULL,
+                                            'sub_name'	TEXT,
+                                            'phone'	TEXT NOT NULL,
+                                            'act'	TEXT,
+                                            'about_me'	TEXT);""")
+            except sqlite3.OperationalError:
+                pass
+            cursor.execute("insert into Admins values (?, ?, ?, ?, ?, ?, '')", txt)
 
-        self.bot.send_message(self.user_id, "Вы зарегистрированы как администратор")
-        self.bot.send_message(self.user_id, "Введите команду /help для получения справки о функциях бота")
+            self.bot.send_message(self.user_id, "Вы зарегистрированы как администратор")
+            self.bot.send_message(self.user_id, "Введите команду /help для получения справки о функциях бота")
+        except:
+            self.bot.send_message(self.user_id, "Неверный формат ввода")
         connection.commit()
         get_users().update()
         cursor.close()
