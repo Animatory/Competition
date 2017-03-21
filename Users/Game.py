@@ -14,7 +14,7 @@ class Game:
         self.user = message.from_user.id
         mes = message.text
         self.gamename = re.sub('\/\w+\s*', "", mes).strip()
-        connection = sqlite3.connect('Users/Games.db')
+        connection = sqlite3.connect('Games.db')
         cursor = connection.cursor()
         try:
             cursor.execute("select * from '{}'".format(self.gamename))
@@ -24,7 +24,7 @@ class Game:
             self.resp = self.bot.send_message(self.chat_id, "Неверное название квеста")
 
     def authorization(self, message):
-        connection = sqlite3.connect('Users/Games.db')
+        connection = sqlite3.connect('Games.db')
         cursor = connection.cursor()
         login = re.sub('\/\w+\s*', "", message.text).strip()
         teams = cursor.execute('select * from Teams').fetchall()
@@ -86,7 +86,7 @@ class Game:
             self.bot.register_next_step_handler(self.resp, self.catch)
 
     def final(self):
-        connection = sqlite3.connect('Users/Games.db')
+        connection = sqlite3.connect('Games.db')
         cursor = connection.cursor()
         x = time.clock()
         x = str(int(x) + self.points)

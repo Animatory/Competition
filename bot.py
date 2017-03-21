@@ -45,9 +45,9 @@ def be_admin(message):
     uid = message.from_user.id
     bot.send_message(uid, "Здравствуйте, {} {}".format(message.from_user.first_name, message.from_user.last_name))
     if get_users().ismember(uid):
-        bot.send_message(uid, "Для получения списка команд введите /помощь")
+        bot.send_message(uid, "Для получения списка команд введите /help")
     else:
-        bot.send_message(uid, "Так вы не зарегестрированы как пользователь, функциолнал бота вам недоступен")
+        bot.send_message(uid, "Так как вы не зарегестрированы как пользователь, функциолнал бота вам недоступен")
 
 
 def ca(message):
@@ -60,7 +60,7 @@ def ca(message):
 @bot.message_handler(func=lambda message: ca(message), content_types=['text'])
 def check_answer(message):
     idu = message.chat.id
-    if message.text == '/помощь':
+    if message.text == '/help':
         SuperUser(bot, message).help()
     elif message.text.startswith("/"):
         if idu in get_users().admins_list:

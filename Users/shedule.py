@@ -16,25 +16,28 @@ class Schedule:
     def __init__(self, bot):
         self.bot = bot
         while 1:
-            self.sch = self.sch_list()
+            self.sch = self.sch_list
             self.sendm()
             time.sleep(600)
 
     def sch_list(self):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
-        sc = cursor.execute('select * from schedule').fetchall()
-        li = []
-        for i in sc:
-            i = i[0]
-            sch = cursor.execute('select * from "sch_{}"'.format(i)).fetchall()
-            sch = [list(j) + [i.replace("_", " ")] for j in sch]
-            li += sch
-        li.sort(key=s)
-        for i in range(len(li)):
-            h, m = li[i][0].split(":")
-            li[i][0] = int(m) + int(h) * 60
-        return li
+        try:
+            sc = cursor.execute('select * from schedule').fetchall()
+            li = []
+            for i in sc:
+                i = i[0]
+                sch = cursor.execute('select * from "sch_{}"'.format(i)).fetchall()
+                sch = [list(j) + [i.replace("_", " ")] for j in sch]
+                li += sch
+            li.sort(key=s)
+            for i in range(len(li)):
+                h, m = li[i][0].split(":")
+                li[i][0] = int(m) + int(h) * 60
+            return li
+        except sqlite3.OperationalError:
+            return None
 
     def current_time(self):
         tim = time.ctime(time.time()).split(" ")[3].split(":")[:-1]
@@ -43,16 +46,23 @@ class Schedule:
         return tim
 
     def lessten(self):
-        li = [i[1:] + [i[0] - self.current_time()] for i in self.sch_list() if 0 < i[0] - self.current_time() <= 10]
-        li = [[i[0] + "\n" + 'Место - ' + i[1], i[-2], i[-1]] for i in li]
-        return li
+        a = self.sch_list()
+        if a:
+            li = [i[1:] + [i[0] - self.current_time()] for i in a if 0 < i[0] - self.current_time() <= 10]
+            li = [[i[0] + "\n" + 'Место - ' + i[1], i[-2], i[-1]] for i in li]
+            return li
 
     def sendm(self):
-        connection = sqlite3.connect('Users/Users.db')
-        cursor = connection.cursor()
-        users = cursor.execute('select * from Users').fetchall()
-        users = [[i[0], i[-2]] for i in users]
-        for i in self.lessten():
-            for j in users:
-                if i[1] in j:
-                    self.bot.send_message(j[0], "Через {} минут: ".format(i[2]) + i[0])
+        a = self.lessten()
+        if a:
+            connection = sqlite3.connect('Users.db')
+            cursor = connection.cursor()
+            users = cursor.execute('select * from Users').fetchall()
+            users = [[i[0], i[-2]] for i in users]
+            for i in a:
+                for j in users:
+                    if i[1] in j:
+                        self.bot.send_message(j[0], "Через {} минут: ".format(i[2]) + i[0])
+
+
+a = r'C:\Python36\python.exe -m zipapp "C:\Users\Workflow\Desktop\Telegram-bot" -m bot:main -o Tbot.pyz'

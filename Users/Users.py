@@ -71,6 +71,7 @@ ut = ('/событие – выводит текущий и следующий �
       '/руководители - выдаёт список всех администраторов с информацией о них\n\n'
       '/участники - выдаёт список всех пользователей с информацией о них\n')
 
+
 def current_time():
     tim = time.ctime(time.time()).split(" ")[3].split(":")[:-1]
     a, b = map(int, tim)
@@ -78,16 +79,22 @@ def current_time():
     return tim
 
 
-class get_users():
+class get_users:
     user_list = []
     admins_list = []
     active_users = {}
 
     def __init__(self):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
-        a = cursor.execute('select * from Admins').fetchall()
-        u = cursor.execute('select * from Users').fetchall()
+        try:
+            u = cursor.execute('select * from Users').fetchall()
+        except sqlite3.OperationalError as y:
+            u = []
+        try:
+            a = cursor.execute('select * from Admins').fetchall()
+        except sqlite3.OperationalError as y:
+            a = []
         self.user_list = [i[0] for i in u]
         self.admins_list = [i[0] for i in a]
         connection.close()
@@ -112,8 +119,18 @@ class SuperUser:
             self.bot.send_message(self.user_id, ut)
 
     def users(self, message):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
+        try:
+            cursor.execute("""CREATE TABLE Users (
+                            'id'	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                            'last_name'	TEXT NOT NULL,
+                            'first_name'	TEXT NOT NULL,
+                            'sub_name'	TEXT,
+                            'group'	TEXT NOT NULL,
+                            'where'	TEXT);""")
+        except sqlite3.OperationalError:
+            pass
         if message.startswith("/участники"):
             u = cursor.execute('select * from Users').fetchall()
             for i in range(len(u)):
@@ -161,7 +178,7 @@ class SuperUser:
             self.bot.send_message(self.user_id, "Не указан параметр")
             return None
         field = keys[key]
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         cursor.execute(file.format(field, message, self.user_id))
         connection.commit()
@@ -170,7 +187,7 @@ class SuperUser:
         self.bot.send_message(self.user_id, "Данные обновлены")
 
     def get_schedule(self, group):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         try:
             u = cursor.execute("select * from 'sch_{}'".format(group.replace(" ", "_"))).fetchall()
@@ -181,7 +198,7 @@ class SuperUser:
         connection.close()
 
     def achievement_list(self, name):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         if name:
             u = cursor.execute('select * from Achieve').fetchall()
@@ -226,7 +243,7 @@ class User(SuperUser):
         try:
             group = message.split(" ")[1]
         except IndexError:
-            connection = sqlite3.connect('Users/Users.db')
+            connection = sqlite3.connect('Users.db')
             cursor = connection.cursor()
             group = cursor.execute('select * from Users where id = {}'.format(self.user_id)).fetchall()[0][4]
             cursor.close()
@@ -235,7 +252,7 @@ class User(SuperUser):
         self.de()
 
     def current_event(self, message):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         group = cursor.execute('select * from Users where id = {}'.format(self.user_id)).fetchall()[0][4]
         try:
@@ -286,7 +303,10 @@ class User(SuperUser):
 
     def users(self, message):
         us = super().users(message)
-        self.bot.send_message(self.user_id, "\n\n".join(us))
+        if us:
+            self.bot.send_message(self.user_id, "\n\n".join(us))
+        else:
+            self.bot.send_message(self.user_id, "Участников нет")
         self.de()
 
     def whereis(self, message):
@@ -324,7 +344,7 @@ class Admin(SuperUser):
                 self.de()
 
     def hello(self, message):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         txt = [i.strip() for i in message.text.split(",", maxsplit=2)]
         txt[:1] = txt[0].split(" ")
@@ -359,7 +379,7 @@ class Admin(SuperUser):
         self.de()
 
     def give_achievement(self, message):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         pattern = re.compile('\(\w+\s\w+\s\w+\)')
         message = re.sub('\/\w+\s', "", message)
@@ -416,15 +436,19 @@ class Admin(SuperUser):
 
     def users(self, message):
         us = super().users(message)
-        self.bot.send_message(self.user_id, "\n\n".join(us))
+        if us:
+            self.bot.send_message(self.user_id, "\n\n".join(us))
+        else:
+            self.bot.send_message(self.user_id, "Участников нет")
         self.de()
+
 
     def whereis(self, message):
         super().whereis(message)
         self.de()
 
     def give_message(self, message):
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         try:
             message = re.sub('\/\w+\s*', "", message)
@@ -480,7 +504,7 @@ class Admin(SuperUser):
 
     def schedule(self, message):
         if message.text.startswith('/end'):
-            connection = sqlite3.connect('Users/Users.db')
+            connection = sqlite3.connect('Users.db')
             cursor = connection.cursor()
             try:
                 cursor.execute("""CREATE TABLE 'schedule' ('name' TEXT NOT NULL UNIQUE);""")
@@ -568,7 +592,7 @@ class Admin(SuperUser):
             self.bot.send_message(self.user_id, "Запись прервана")
             self.de()
             return None
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         cursor = connection.cursor()
         new_id = message.forward_from.id
         txt = [new_id] + self.message
@@ -598,7 +622,7 @@ class Admin(SuperUser):
             self.bot.send_message(self.user_id, "Запись прервана")
             self.de()
             return None
-        connection = sqlite3.connect('Users/Users.db')
+        connection = sqlite3.connect('Users.db')
         new_id = message.forward_from.id
         txt = [new_id] + self.message
         try:
@@ -621,7 +645,7 @@ class Admin(SuperUser):
         self.ind = -1
 
     def set_teams(self, message):
-        connection = sqlite3.connect('Users/Games.db')
+        connection = sqlite3.connect('Games.db')
         cursor = connection.cursor()
         teams = message.text
         try:
@@ -671,7 +695,7 @@ class Admin(SuperUser):
                 self.bot.send_message(self.user_id, "В аргументах должно быть число")
                 self.bot.register_next_step_handler(self.resp, self.set_question)
         elif message.text.startswith("/end"):
-            connection = sqlite3.connect('Users/Games.db')
+            connection = sqlite3.connect('Games.db')
             cursor = connection.cursor()
             try:
                 cursor.execute("delete from '{}' where 1 = 1".format(self.gamename))
