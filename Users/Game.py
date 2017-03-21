@@ -36,10 +36,12 @@ class Game:
             teams = list(teams[0])
             if teams[1] is None:
                 teams[1:4] = [""] * 3
+            if teams[1] == "":
+                teams[1] = str(self.adm.user.id)
             if self.adm.user.id != message.from_user.id:
                 self.bot.send_message(self.chat_id, "Логин команды должен вводить создатель группы")
                 self.bot.register_next_step_handler(self.resp, self.authorization)
-            elif self.gamename in teams[1].split(",") or (self.adm.user.id != teams[1] != ""):
+            elif self.gamename in teams[2].split(",") or str(self.adm.user.id) != teams[1]:
                 self.bot.send_message(self.chat_id, "Данный квест недоступен")
             else:
                 self.team = teams  # Хранит игры и поинты команды

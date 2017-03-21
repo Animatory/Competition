@@ -63,3 +63,6 @@ class Schedule:
                 for j in users:
                     if i[1] in j:
                         self.bot.send_message(j[0], "Через {} минут: ".format(i[2]) + i[0])
+
+
+a = r'C:\Python36\python.exe -m zipapp "C:\Users\Workflow\Desktop\Telegram-bot" -m bot:main -o Tbot.pyz'

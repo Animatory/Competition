@@ -725,6 +725,28 @@ class Admin(SuperUser):
                 self.bot.send_message(self.user_id, "Неверный формат ввода вопроса. Попробуйте ещё раз.")
             self.bot.register_next_step_handler(self.resp, self.set_question)
 
+    def results(self, message):
+        connection = sqlite3.connect('Games.db')
+        cursor = connection.cursor()
+        try:
+            teams = cursor.execute('select * from Teams').fetchall()
+            for i in teams:
+                name = str(i[0]) + "\n"
+                games = i[2].split(",")
+                points = i[3].split(',')
+                try:
+                    p = list(map(int, points))
+                except ValueError:
+                    p = [0]
+                p = "\nИтого: " + str(sum(p))
+                z = zip(games, points)
+                z = "\n".join([" - ".join(list(i))+" баллов" for i in z])
+                if z == " -  баллов":
+                    z = "Пройденный квестов нет"
+                self.bot.send_message(self.user_id, name+z+p)
+        except:
+            self.bot.send_message(self.user_id, "Результатов нет")
+
     list_commands = {
         "/создать_квест": set_game,
         '/добавить_участника': add_user,
@@ -734,6 +756,7 @@ class Admin(SuperUser):
         '/сообщение': give_message,
         '/дать_ачивку': give_achievement,
         '/ачивки': achievement_list,
+        '/результаты': results,
         '/имя': set_sth,
         '/фамилия': set_sth,
         '/отчество': set_sth,
